@@ -1,6 +1,6 @@
 import asyncio
 import os
-import google.generativeai as genai
+from groq import Groq
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from dotenv import load_dotenv
@@ -8,10 +8,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-GEMINI_KEY = os.getenv("GEMINI_KEY")
+GROQ_KEY = os.getenv("GROQ_KEY")
 
-genai.configure(api_key=GEMINI_KEY)
-model = genai.GenerativeModel("gemini-1.5-flash")
+client = Groq(api_key=GROQ_KEY)
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
@@ -33,11 +32,14 @@ async def chat(message: types.Message):
     user_id = message.from_user.id
     if user_id not in history:
         history[user_id] = []
-    history[user_id].append({"role": "user", "parts": [message.text]})
+    history[user_id].append({"role": "user", "content": message.text})
     try:
-        response = model.generate_content(history[user_id])
-        answer = response.text
-        history[user_id].append({"role": "model", "parts": [answer]})
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=history[user_id]
+        )
+        answer = response.choices[0].message.content
+        history[user_id].append({"role": "assistant", "content": answer})
         await message.answer(answer)
     except Exception as e:
         await message.answer(f"Ошибка: {e}")
