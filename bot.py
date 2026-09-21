@@ -1,4 +1,5 @@
 import asyncio
+import time
 import os
 from groq import Groq
 from aiogram import Bot, Dispatcher, types
@@ -52,6 +53,8 @@ async def chat(message: types.Message):
         await message.answer(f"Ошибка: {e}")
 
 async def main():
+    await bot.delete_webhook(drop_pending_updates=True)
+    time.sleep(5)
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
