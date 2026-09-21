@@ -40,7 +40,14 @@ async def chat(message: types.Message):
         )
         answer = response.choices[0].message.content
         history[user_id].append({"role": "assistant", "content": answer})
-        await message.answer(answer)
+
+        max_length = 4096
+        if len(answer) > max_length:
+            for i in range(0, len(answer), max_length):
+                part = answer[i:i + max_length]
+                await message.answer(part)
+        else:
+            await message.answer(answer)
     except Exception as e:
         await message.answer(f"Ошибка: {e}")
 
