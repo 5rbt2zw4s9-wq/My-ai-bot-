@@ -35,7 +35,7 @@ async def chat(message: types.Message):
     history[user_id].append({"role": "user", "content": message.text})
     try:
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="llama-3.1-8b-instant",
             messages=history[user_id]
         )
         answer = response.choices[0].message.content
